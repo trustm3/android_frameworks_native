@@ -71,6 +71,13 @@ static bool check_mac_perms(pid_t spid, uid_t uid, const char *tctx, const char 
     bool allowed;
     struct audit_data ad;
 
+    /*
+     * We come from a different context in case we share binder services, e.g. audio_flinger
+     * In those cases the pid of the source process is 0 and we have to skip the mac_check
+     */
+    if (spid == 0)
+        return true;
+
     if (getpidcon(spid, &sctx) < 0) {
         ALOGE("SELinux: getpidcon(pid=%d) failed to retrieve pid context.\n", spid);
         return false;
