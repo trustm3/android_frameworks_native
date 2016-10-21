@@ -62,6 +62,15 @@ bool checkCallingPermission(const String16& permission, int32_t* outPid, int32_t
     uid_t uid = ipcState->getCallingUid();
     if (outPid) *outPid = pid;
     if (outUid) *outUid = uid;
+
+    /*
+     * We come from a different context in case we share binder services, e.g. audio_flinger
+     * In those cases the pid of the source process is 0 and we have to skip the permission check
+     * TODO replace this with proper permission check
+     */
+    if (pid == 0)
+        return true;
+
     return checkPermission(permission, pid, uid);
 }
 
