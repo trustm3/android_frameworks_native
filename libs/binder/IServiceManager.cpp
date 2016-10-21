@@ -72,6 +72,14 @@ bool checkPermission(const String16& permission, pid_t pid, uid_t uid)
     return true;
 #endif
 
+    /*
+     * We come from a different context in case we share binder services, e.g. audio_flinger
+     * In those cases the pid of the source process is 0 ( or -1 in Android 7.0 ) and we have to skip the permission check
+     * TODO replace this with proper permission check
+     */
+    if (pid < 0)
+        return true;
+
     sp<IPermissionController> pc;
     gDefaultServiceManagerLock.lock();
     pc = gPermissionController;
